@@ -43,7 +43,7 @@ so learners build a four-step habit for spotting phishing and scams.
 **How we used LLM coding agents.** We wrote the details down before any code, so the agents had
 nothing to invent: the idea and an append-only decision log (agents propose, humans decide); the
 style prototyped in HTML/CSS plus a design guide and character sheets; one MVP 0 plan as the single
-source of truth, planned with JetBrains Air (game loop, data contracts C1–C5, engine constants, every screen, deployment, safety
+source of truth, planned with JetBrains Air, Claude and other AI assistants (game loop, data contracts C1–C5, engine constants, every screen, deployment, safety
 rules); and one `AGENTS.md` brief that every agent reads (Claude Code via a one-line `CLAUDE.md`).
 Later modules (Boardroom crisis, password Vault drill, storytelling) each started from their own
 brief. Work was split the traditional way: one git branch per person, small PRs reviewed by a
