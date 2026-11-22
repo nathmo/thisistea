@@ -43,29 +43,29 @@
             key: 'who', tag: 'WHO', q: 'Who is really writing?',
             choices: ["ParcelPoint's delivery team", 'Someone using a lookalike address', 'The shop you ordered from'],
             correct: 1,
-            spider: 'Ah, you read past the name… Most people stop at “ParcelPoint”.',
+            spider: 'You read the address. Most people stop at the name.',
             why: "The address is on parcelpoint-fees.example, not ParcelPoint's own domain, parcelpoint.example.",
         },
         {
             key: 'emotion', tag: 'FEELING', q: 'What feeling is it pushing?',
             choices: ['None: it is a plain notice', 'Greed for a free gift', 'Hurry: pay within 24 hours or lose the parcel'],
             correct: 2,
-            spider: 'A short clock and a small loss. Hurry makes careful people careless.',
+            spider: 'Twenty-four hours is plenty, if nobody checks. That is why I did not give you forty-eight.',
             why: '“Within 24 hours” is there to rush you. The tiny fee makes paying feel harmless.',
         },
         {
             key: 'ask', tag: 'ASK', q: 'What exactly does it want you to do?',
             choices: ['Reply with your address', 'Pay a small fee through a link', 'Collect the parcel from a neighbour'],
             correct: 1,
-            spider: 'CHF 1.99 is the bait. Your card number is the catch.',
+            spider: 'Nobody argues over CHF 1.99. They just type in the card number.',
             why: 'The page would ask for your card details. A real carrier does not collect fees through a link in a message.',
         },
         {
             key: 'verify', tag: 'CHECK', q: 'How do you check, through a channel you control?',
             choices: ['Reply STOP so they take you off the list', 'Pay it, it is only CHF 1.99', 'Open the ParcelPoint app yourself and look'],
             correct: 2,
-            spider: 'Walk in through a door you already know… and I have nothing.',
-            why: 'Never use the path they hand you. Replying STOP only confirms your address is live.',
+            spider: 'You opened the app yourself. Then I have nothing to show you.',
+            why: 'Use a route you found yourself, not one from the message. Replying STOP only confirms your address is live.',
         },
     ];
 
@@ -120,7 +120,7 @@
         const fb = el('div', { class: 'quiz-feedback' },
             el('img', { src: spiderImg, alt: 'Spider' }),
             el('div', {}, el('p', {}, s.spider), el('p', { class: 'plain' }, s.why)));
-        const next = el('button', { class: 'btn btn-go btn-sm', type: 'button' }, step < STEPS.length - 1 ? 'Next step' : 'See how you did');
+        const next = el('button', { class: 'btn btn-go btn-sm', type: 'button' }, step < STEPS.length - 1 ? 'Next step' : 'See your result');
         next.addEventListener('click', () => { step++; render(); });
         body.append(fb, el('div', { class: 'quiz-actions' }, next));
         next.focus({ preventScroll: true });
@@ -137,12 +137,12 @@
         });
         body.append(el('div', { class: 'quiz-done' },
             el('div', { class: 'score' }, `${firstTry}/4`),
-            el('p', {}, perfect ? 'Every step on the first try. Bernard would be proud.' : 'Steps right on the first try. In the app, the ones you missed keep their prompts a little longer.'),
+            el('p', {}, perfect ? 'All four steps right on the first try.' : 'Steps right on the first try. In the app, a step you miss keeps its prompt for longer.'),
             el('div', { class: 'quiz-feedback', style: 'justify-content:center;text-align:left;margin-top:1.2rem' },
                 el('img', { src: spiderImg, alt: 'Spider' }),
-                el('p', {}, perfect ? 'Hmph. Next time I will write in a different coat of paint…' : 'No harm done. That is how everyone learns.')),
+                el('p', {}, perfect ? 'Fine. Next time it will not be a parcel.' : 'Lucky for you that one was mine.')),
             el('div', { class: 'quiz-actions', style: 'justify-content:center' },
-                el('a', { class: 'btn btn-go btn-sm', href: 'https://stygiansummer.github.io/Lauzhack/' }, 'Do the full lesson'), again)));
+                el('a', { class: 'btn btn-go btn-sm', href: 'https://stygiansummer.github.io/Lauzhack/' }, 'Open lesson 1'), again)));
     }
 
     render();
