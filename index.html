@@ -13,6 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="assets/css/site.css">
+    <link rel="stylesheet" href="assets/css/writeup.css">
 </head>
 <body>
 
@@ -25,6 +26,7 @@
             <li><a href="#how">How it works</a></li>
             <li><a href="#try">Try it</a></li>
             <li><a href="#guides">Guides</a></li>
+            <li><a href="#writeup">Writeup</a></li>
         </ul>
         <a class="btn btn-go btn-sm" href="https://stygiansummer.github.io/Lauzhack/">Open the app</a>
     </div>
@@ -411,12 +413,12 @@
     </div>
 </section>
 
-<!-- SCIENCE + TECH -->
+<!-- SCIENCE -->
 <section class="section tint-cat" id="science">
     <div class="wrap">
         <div class="section-head reveal">
             <span class="eyebrow">Under the hood</span>
-            <h2>Grounded in learning science. Built to run anywhere.</h2>
+            <h2>Grounded in learning science.</h2>
         </div>
         <div class="two-col">
             <div class="panel reveal">
@@ -429,16 +431,283 @@
                 </ul>
             </div>
             <div class="panel reveal">
-                <h3>How it's built</h3>
-                <div class="chips">
-                    <span class="chip k">Kotlin Multiplatform</span><span class="chip k">Compose Multiplatform</span>
-                    <span class="chip k">Web (Wasm)</span><span class="chip k">Desktop</span><span class="chip k">Android</span>
-                    <span class="chip s">Ktor server</span><span class="chip s">PostgreSQL</span><span class="chip s">Caddy · Docker</span>
-                    <span class="chip w">JSON content packs</span><span class="chip w">en · fr · es</span><span class="chip w">Screenshot-tested UI</span>
+                <h3>How the prompts fade</h3>
+                <p class="note" style="margin:0 0 1rem">Each of the four steps has its own mastery estimate, updated after every answer with
+                    Bayesian knowledge tracing. A used hint or a very slow answer counts as wrong. The estimate picks the support:</p>
+                <ul class="refs">
+                    <li><span class="n" style="width:auto;padding:0 .4rem;border-radius:999px">&lt;.35</span><div><b>Worked example</b><span>Cat explains the step on this email and highlights the clue.</span></div></li>
+                    <li><span class="n" style="width:auto;padding:0 .4rem;border-radius:999px">.35</span><div><b>Prompted</b><span>The step's question, with three choices.</span></div></li>
+                    <li><span class="n" style="width:auto;padding:0 .4rem;border-radius:999px">.6</span><div><b>Hint</b><span>No question, just a small “Need a hint?” button.</span></div></li>
+                    <li><span class="n" style="width:auto;padding:0 .4rem;border-radius:999px">.8+</span><div><b>Faded</b><span>Nothing. You do that step on your own.</span></div></li>
+                </ul>
+                <p class="note">Mastered means p ≥ 0.95 with three unaided answers. Hysteresis keeps a step from flickering between levels.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- WRITEUP -->
+<section class="section" id="writeup">
+    <div class="wrap">
+        <div class="section-head reveal">
+            <span class="eyebrow">Writeup</span>
+            <h2>How we built it in a weekend.</h2>
+            <p class="intro">Four people, one Kotlin codebase, a containerised backend, and AI coding agents that worked
+                from a written plan instead of guessing. Here is the architecture, the decisions behind it, and the
+                workflow that kept four branches from colliding.</p>
+        </div>
+
+        <div class="stats reveal" aria-label="The project in numbers">
+            <div class="stat"><b>4</b><span>people, 48 hours</span></div>
+            <div class="stat"><b>31.7k</b><span>lines of Kotlin</span></div>
+            <div class="stat"><b>56</b><span>test files, run in CI</span></div>
+            <div class="stat"><b>1,187</b><span>lines of build plan</span></div>
+            <div class="stat"><b>3 × 3</b><span>platforms × languages</span></div>
+        </div>
+
+        <!-- 1. Architecture -->
+        <div class="wu-block">
+            <div class="wu-title reveal"><b>1</b><h3>Architecture at a glance</h3></div>
+            <p class="wu-lede reveal">One shared Kotlin module holds the screens and the learning logic; the platform apps are thin shells around it.
+                The backend is optional: without it the app runs as a guest on bundled content and syncs later.</p>
+
+            <div class="arch reveal" role="img" aria-label="Architecture: web, desktop and Android apps share one Kotlin Multiplatform module and talk over HTTPS to a Docker Compose stack of Caddy, a Ktor server and PostgreSQL.">
+                <div class="arch-col">
+                    <div class="targets">
+                        <div class="node kt"><h4>Web</h4><p>wasmJs</p></div>
+                        <div class="node kt"><h4>Desktop</h4><p>JVM</p></div>
+                        <div class="node kt"><h4>Android</h4><p>own module</p></div>
+                    </div>
+                    <div class="down">↑ ↑ ↑<small>thin shells</small></div>
+                    <div class="node kt">
+                        <h4><span class="kicker">shared/</span> Kotlin Multiplatform</h4>
+                        <p>Every screen (Compose), the theme, the learning engines (placement, BKT mastery, fading, item selection,
+                            XP, streaks), content loading and validation, i18n, the network client and an offline sync queue.</p>
+                    </div>
+                    <div class="node data">
+                        <h4><span class="kicker">content/</span> JSON packs</h4>
+                        <p>Items, lessons and challenges in en/fr/es, bundled into the build. A contract between writers and engine,
+                            validated by tests.</p>
+                    </div>
                 </div>
-                <p class="note">One shared codebase for every screen, the learning engines (placement, mastery, prompt fading,
-                    item selection, XP) and content validation. AI stays behind the scenes, never as a chat window:
-                    for generating variations a human reviews, and for grading your free-text reasoning against the four steps.</p>
+
+                <div class="wire"><span>HTTPS<br>one origin</span><div class="line"></div><span><code>/</code> app<br><code>/api</code> server</span></div>
+
+                <div class="arch-col">
+                    <div class="docker">
+                        <span class="label">🐳 Docker Compose</span>
+                        <div class="node">
+                            <h4><span class="kicker">web</span> Caddy</h4>
+                            <p>Serves the Wasm build at <code>/</code>, proxies <code>/api</code>, automatic Let's Encrypt HTTPS.</p>
+                        </div>
+                        <div class="down">↓</div>
+                        <div class="node srv">
+                            <h4><span class="kicker">app</span> Ktor server</h4>
+                            <p>Accounts and email codes, sync, leaderboard, password analysis (argon2id, never plaintext)
+                                and the opt-in practice email scheduler.</p>
+                        </div>
+                        <div class="down">↓</div>
+                        <div class="node srv">
+                            <h4><span class="kicker">db</span> PostgreSQL 16</h4>
+                            <p>Through Exposed. H2 in memory for tests and quick local runs.</p>
+                        </div>
+                    </div>
+                    <div class="node ops">
+                        <h4><span class="kicker">CI</span> GitHub Actions</h4>
+                        <p>Tests on every push · Wasm mirror on GitHub Pages · a screenshot of every screen published to a branch.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="decisions">
+                <div class="decision reveal"><span class="n">A</span><h4>One Kotlin codebase, no JS front end</h4>
+                    <p>Web, desktop and Android share every screen and engine. <b>Why:</b> one place to fix a bug, and the theme, dark mode and translations work everywhere at once.</p></div>
+                <div class="decision reveal"><span class="n">B</span><h4>Engines are pure Kotlin, shared with the server</h4>
+                    <p>Mastery, fading, selection and XP live in <code>commonMain</code> with no UI code. <b>Why:</b> they are unit-tested, and XP is computed the same way on client and server.</p></div>
+                <div class="decision reveal"><span class="n">C</span><h4>Content is data, and data is a contract</h4>
+                    <p>Items and lessons are JSON files with a fixed shape. <b>Why:</b> writers and coders work in parallel, and adding a language takes files only, no code.</p></div>
+                <div class="decision reveal"><span class="n">D</span><h4>Containerised backend, one origin</h4>
+                    <p>One Compose file for production (Caddy + Ktor + Postgres), one for development that needs no <code>.env</code>. <b>Why:</b> the same stack runs on any host, and one origin means no CORS and no tunnel URLs.</p></div>
+                <div class="decision reveal"><span class="n">E</span><h4>Offline-first, guest by default</h4>
+                    <p>Content ships in the build; progress is stored locally and queued for sync. <b>Why:</b> grandma's flaky Wi-Fi, and a demo that never depends on the venue network.</p></div>
+                <div class="decision reveal"><span class="n">F</span><h4>Privacy first, AI behind an interface</h4>
+                    <p>Click-only practice email, no tracking pixel, hashed passwords. AI grading sits behind an interface with a rules fallback. <b>Why:</b> what ships today makes no live AI calls, so it is cheap and predictable.</p></div>
+            </div>
+        </div>
+
+        <!-- 2. JetBrains -->
+        <div class="wu-block">
+            <div class="wu-title reveal"><b>2</b><h3>Built on JetBrains technology</h3></div>
+            <p class="wu-lede reveal">Kotlin end to end, from the canvas in your browser to the SQL on the server.
+                We started from the JetBrains Kotlin Multiplatform wizard in IntelliJ IDEA and kept its stack.</p>
+            <div class="kotlin">
+                <ul class="lib-list reveal">
+                    <li><b>Kotlin Multiplatform</b><span>One <code>shared</code> module compiled to Wasm, JVM and Android. Small <code>expect</code>/<code>actual</code> files cover storage, HTTP, links and sharing.</span></li>
+                    <li><b>Compose Multiplatform</b><span>Every screen. On the web it draws to a canvas, so the app's fonts are bundled rather than loaded from the web.</span></li>
+                    <li><b>Ktor</b><span>The server (auth, rate limits, CORS, mail) and the app's HTTP client, with a different engine per platform.</span></li>
+                    <li><b>Exposed</b><span>Type-safe SQL over PostgreSQL, H2 in tests.</span></li>
+                    <li><b>kotlinx</b><span>serialization for content and the API, coroutines for the sync queue, datetime for streaks.</span></li>
+                    <li><b>Gradle (Kotlin DSL)</b><span>Version catalog, a task that bundles content, and a strict mode that turns a missing translation into a build error.</span></li>
+                    <li><b>Koog</b><span>Planned for AI grading behind the shared interface. The rules grader ships today.</span></li>
+                </ul>
+                <div class="reveal">
+                    <p class="code-title">shared/src/commonMain/kotlin/tea/engine/Bkt.kt (trimmed)</p>
+<pre class="code"><span class="k">object</span> <span class="t">Bkt</span> {
+    <span class="k">const val</span> SLIP = <span class="s">0.10</span>
+    <span class="k">const val</span> LEARN = <span class="s">0.12</span>
+
+    <span class="c">/** Posterior given the answer, then the learning step. */</span>
+    <span class="k">fun</span> update(p: <span class="t">Double</span>, correct: <span class="t">Boolean</span>, guess: <span class="t">Double</span>): <span class="t">Double</span> {
+        <span class="k">val</span> posterior = <span class="k">if</span> (correct) {
+            <span class="k">val</span> num = p * (<span class="s">1</span> - SLIP)
+            num / (num + (<span class="s">1</span> - p) * guess)
+        } <span class="k">else</span> {
+            <span class="k">val</span> num = p * SLIP
+            num / (num + (<span class="s">1</span> - p) * (<span class="s">1</span> - guess))
+        }
+        <span class="k">return</span> posterior + (<span class="s">1</span> - posterior) * LEARN
+    }
+}</pre>
+                    <p class="code-title">One declaration in commonMain, one actual per platform</p>
+<pre class="code"><span class="c">// commonMain</span>
+<span class="k">expect fun</span> platformKeyValueStore(): <span class="t">KeyValueStore</span>
+
+<span class="c">// wasmJsMain  → localStorage</span>
+<span class="c">// jvmMain     → a file</span>
+<span class="c">// androidMain → SharedPreferences</span></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. LLM workflow -->
+        <div class="wu-block">
+            <div class="wu-title reveal"><b>3</b><h3>How we used LLM agents: write it down first</h3></div>
+            <p class="wu-lede reveal">Coding agents are fast, but they invent whatever you leave out. So before any code we wrote the details down:
+                the game loop, the data formats, the formulas, the styling and the characters. The agents had nothing left to make up,
+                and every teammate's agent read the same files.</p>
+
+            <ol class="flow">
+                <li class="reveal"><span class="dot" style="background:var(--cat-soft)">🧭</span><div class="box">
+                    <h4>Idea and decisions, by humans</h4>
+                    <p>The pitch, the research behind it and the target audiences went into one idea file. Every choice that changed scope
+                        became a dated line in an append-only decision log. The rule: <b>agents propose, humans decide.</b></p>
+                    <div class="files"><a class="file" href="https://github.com/StygianSummer/Lauzhack/blob/main/docs/idea.md">docs/idea.md</a><a class="file" href="https://github.com/StygianSummer/Lauzhack/blob/main/docs/decisions.md">docs/decisions.md</a></div>
+                </div></li>
+
+                <li class="reveal"><span class="dot" style="background:var(--spider-soft)">🎨</span><div class="box">
+                    <h4>Style and characters, prototyped in HTML</h4>
+                    <p>The look was designed as a static HTML/CSS page, which is quick to iterate on in a browser. A 268-line design guide
+                        turned it into rules: each character owns a typeface, Spider always speaks from the dark, ink outlines and hard shadows,
+                        how copy is written. The characters' personalities got their own file. The HTML was then ported to a Compose theme and never shipped.</p>
+                    <div class="files"><a class="file" href="https://github.com/StygianSummer/Lauzhack/blob/main/guide-rules.md">guide-rules.md</a><a class="file" href="https://github.com/StygianSummer/Lauzhack/blob/main/static/tea-theme.css">static/tea-theme.css</a><a class="file" href="https://github.com/StygianSummer/Lauzhack/blob/main/docs/characters.md">docs/characters.md</a></div>
+                </div></li>
+
+                <li class="reveal"><span class="dot" style="background:var(--dog-soft)">📐</span><div class="box">
+                    <h4>The MVP 0 plan: one source of truth</h4>
+                    <p>A single plan says exactly what to build: the game loop, who owns which part, five data contracts
+                        (database and events, item JSON, lesson JSON, personas, backend URL), every engine with its constants,
+                        every screen, the deployment files, the safety rules and a definition of done. Every other doc is a
+                        satellite, and when they disagree the plan wins.</p>
+                    <div class="flow-split">
+<pre class="code"><span class="c"># docs/mvp0-plan.md §1.1: the one loop we ship</span>
+register → placement test (~3 min)
+  → lesson 1: email phishing
+  → practice, prompts fade per step
+  → held-out email, all prompts off
+  → opt-in: <span class="s">"send me one practice email"</span>
+  → real email in the real inbox
+  → blame-free debrief with Spider</pre>
+                        <div>
+                            <p style="color:var(--ink-soft);font-size:.95rem">Because the plan had the numbers (<code>SLIP = 0.10</code>), the thresholds, the copy and the colours,
+                                the first full build came out close to what we meant. The places where the plan was vague are where we had to fix things later.</p>
+                            <div class="files"><a class="file" href="https://github.com/StygianSummer/Lauzhack/blob/main/docs/mvp0-plan.md">docs/mvp0-plan.md</a></div>
+                        </div>
+                    </div>
+                </div></li>
+
+                <li class="reveal"><span class="dot" style="background:var(--turtle-soft)">🤖</span><div class="box">
+                    <h4>One brief for every agent</h4>
+                    <p><code>AGENTS.md</code> is read by every agent the team used; Claude Code loads it through a one-line <code>CLAUDE.md</code>.
+                        It sets a ritual for each session: merge <code>main</code>, then read the plan, the decisions, the task board and the others' handoffs.
+                        It also sets the rules: own branch only, who owns which files, no real brands, core content written by humans, frugal AI, no secrets.</p>
+                    <div class="files"><a class="file" href="https://github.com/StygianSummer/Lauzhack/blob/main/AGENTS.md">AGENTS.md</a><a class="file" href="https://github.com/StygianSummer/Lauzhack/blob/main/CLAUDE.md">CLAUDE.md</a><a class="file" href="https://github.com/StygianSummer/Lauzhack/blob/main/TASKS.md">TASKS.md</a></div>
+                </div></li>
+
+                <li class="reveal"><span class="dot" style="background:var(--cat-soft)">🧩</span><div class="box">
+                    <h4>Then more modules, each with its own brief</h4>
+                    <p>Once MVP 0 was on <code>main</code>, each new module started as a written brief naming the components to reuse and the rules to keep:
+                        the Boardroom crisis challenge (397 lines, “no raw hex, no new colours”), the password Vault drill, the storytelling and the short demos.
+                        Teammates built them in parallel on their own branches.</p>
+                    <div class="files"><a class="file" href="https://github.com/StygianSummer/Lauzhack/blob/main/docs/challenge-boardroom-crisis.md">docs/challenge-boardroom-crisis.md</a><a class="file" href="https://github.com/StygianSummer/Lauzhack/blob/main/docs/password-drill.md">docs/password-drill.md</a></div>
+                </div></li>
+
+                <li class="reveal"><span class="dot" style="background:var(--dog-soft)">🔍</span><div class="box">
+                    <h4>Polish with evidence</h4>
+                    <p>The tests render every screen off-screen, and CI publishes the images as a picture book on a <code>screenshots</code> branch.
+                        A new screen does not compile until it is added to that test. Humans and agents reviewed the same pictures, and handoff notes
+                        recorded what was clicked through in a real browser and what broke.</p>
+                    <div class="files"><a class="file" href="https://github.com/StygianSummer/Lauzhack/tree/screenshots">screenshots branch</a><a class="file" href="https://github.com/StygianSummer/Lauzhack/tree/main/docs/handoff">docs/handoff/</a></div>
+                </div></li>
+            </ol>
+        </div>
+
+        <!-- 4. Git -->
+        <div class="wu-block">
+            <div class="wu-title reveal"><b>4</b><h3>Teamwork the traditional way: git</h3></div>
+            <p class="wu-lede reveal">Agents don't get to skip process. Every teammate and their agent worked on their own branch, and work reached
+                <code>main</code> only through a pull request reviewed by someone else.</p>
+            <div class="team">
+                <figure class="gitgraph reveal" style="margin:0">
+                    <svg viewBox="0 0 600 240" role="img" aria-label="Branch diagram: nathann, nicholas, krishna and Fez248/storytelling branch off main and merge back through pull requests 3 to 9.">
+                        <path d="M20,40 H585" stroke="#111b3a" stroke-width="4" fill="none"/>
+                        <text x="20" y="24">main</text>
+                        <path d="M40,40 C55,40 45,85 65,85 H360" stroke="#3b82f6" stroke-width="3" fill="none"/>
+                        <path d="M60,40 C75,40 65,130 85,130 H420" stroke="#f5a524" stroke-width="3" fill="none"/>
+                        <path d="M80,40 C95,40 85,175 105,175 H540" stroke="#1fa97a" stroke-width="3" fill="none"/>
+                        <path d="M100,40 C115,40 105,220 125,220 H480" stroke="#e5384f" stroke-width="3" fill="none"/>
+                        <g stroke-width="2.5" fill="none" stroke-dasharray="5 4">
+                            <path d="M175,85 L200,40" stroke="#3b82f6"/><path d="M235,85 L260,40" stroke="#3b82f6"/>
+                            <path d="M295,85 L320,40" stroke="#3b82f6"/><path d="M355,85 L380,40" stroke="#3b82f6"/>
+                            <path d="M415,130 L440,40" stroke="#f5a524"/><path d="M475,220 L500,40" stroke="#e5384f"/>
+                            <path d="M535,175 L560,40" stroke="#1fa97a"/>
+                        </g>
+                        <g fill="#fff" stroke-width="2.5">
+                            <circle cx="150" cy="85" r="5" stroke="#3b82f6"/><circle cx="215" cy="85" r="5" stroke="#3b82f6"/><circle cx="275" cy="85" r="5" stroke="#3b82f6"/><circle cx="335" cy="85" r="5" stroke="#3b82f6"/>
+                            <circle cx="200" cy="130" r="5" stroke="#f5a524"/><circle cx="300" cy="130" r="5" stroke="#f5a524"/><circle cx="395" cy="130" r="5" stroke="#f5a524"/>
+                            <circle cx="230" cy="175" r="5" stroke="#1fa97a"/><circle cx="370" cy="175" r="5" stroke="#1fa97a"/><circle cx="460" cy="175" r="5" stroke="#1fa97a"/><circle cx="515" cy="175" r="5" stroke="#1fa97a"/>
+                            <circle cx="320" cy="220" r="5" stroke="#e5384f"/><circle cx="410" cy="220" r="5" stroke="#e5384f"/><circle cx="455" cy="220" r="5" stroke="#e5384f"/>
+                        </g>
+                        <g fill="#111b3a">
+                            <circle cx="200" cy="40" r="7"/><circle cx="260" cy="40" r="7"/><circle cx="320" cy="40" r="7"/><circle cx="380" cy="40" r="7"/>
+                            <circle cx="440" cy="40" r="7"/><circle cx="500" cy="40" r="7"/><circle cx="560" cy="40" r="7"/>
+                        </g>
+                        <g text-anchor="middle">
+                            <text x="200" y="24">#3</text><text x="260" y="24">#4</text><text x="320" y="24">#5</text><text x="380" y="24">#6</text>
+                            <text x="440" y="24">#7</text><text x="500" y="24">#8</text><text x="560" y="24">#9</text>
+                        </g>
+                        <text x="134" y="76" class="sm">nathann</text>
+                        <text x="134" y="121" class="sm">nicholas</text>
+                        <text x="134" y="166" class="sm">krishna</text>
+                        <text x="134" y="211" class="sm">Fez248/storytelling</text>
+                    </svg>
+                    <figcaption>Each person on their own branch. Dashed lines are reviewed pull requests into <code>main</code>.</figcaption>
+                </figure>
+                <ul class="rules-list">
+                    <li class="reveal"><b>One branch per person</b><span>Named after the first name. Never commit to <code>main</code>, never push to someone else's branch, merge <code>main</code> in often.</span></li>
+                    <li class="reveal"><b>Small reviewed PRs</b><span>One task each, reviewed by another teammate, or by their agent with the human approving.</span></li>
+                    <li class="reveal"><b>File ownership</b><span>Handoff files belong to one person, the decision log is append-only, and code folders have an owner on the task board.</span></li>
+                    <li class="reveal"><b>Agents talk through files</b><span>No messaging between machines: a question goes in your handoff file as “To krishna: …”, and the answer comes back in theirs.</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 5. Lessons -->
+        <div class="wu-block">
+            <div class="wu-title reveal"><b>5</b><h3>What we learned</h3></div>
+            <div class="learned">
+                <article class="person reveal"><h3>The spec is the product</h3><p style="color:var(--ink-soft)">When the plan had the formula, the copy and the colour, the agent got it right the first time. Every vague line came back as a guess we had to undo.</p></article>
+                <article class="person reveal"><h3>Contracts let agents work in parallel</h3><p style="color:var(--ink-soft)">Fixed JSON formats and API contracts let four people's agents build content, engines, screens and the server side by side without stepping on each other.</p></article>
+                <article class="person reveal"><h3>Writing it down kept us honest</h3><p style="color:var(--ink-soft)">An early draft of the practice email read like a covert phishing kit, and the agents' safety checks flagged it. We rewrote it as a plain, explicit opt-in, and the decision log records why.</p></article>
             </div>
         </div>
     </div>
